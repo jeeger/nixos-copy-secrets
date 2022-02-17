@@ -31,25 +31,19 @@ let
         (attrValues
           (mapAttrs
             (secretName: secretSource: "cp ${secretSource} ${directoryName}/${secretName}") secrets));
-      service-script = pkgs.writeScript "${service}-copy-secrets.sh" ''
-                     #!/bin/bash
-                     set -e
-
-                     mkdir -p ${directoryName}
-                     ${copyCommands}
-                     chown ${owner}:${group} ${directoryName}
-                     chmod -R 400 ${directoryName}
-                     '';
     in
       {
         name = "${service}-copy-secrets";
         value = {
           description = "Copy secret(s) for ${service}";
-          wantedBy = [ "${service}.service" ];
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = "${service-script}";
-          };
+          requiredBy = [ "${service}.service" ];
+          script = ''
+            mkdir -p ${directoryName}
+            ${copyCommands}
+            chown -R ${owner}:${group} ${directoryName}
+            chmod 500 ${directoryName}
+            chmod -R 400 ${directoryName}/*
+          '';
         };
       };
   makePaths = {service, secrets, ...}: {
