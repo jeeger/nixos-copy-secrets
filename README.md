@@ -2,7 +2,7 @@
 
 This is a very simple module that copies files into their destination before running a service.
 
-# Usage example
+# Usage examples
 
 ```nix
   services.copy-secrets = {
@@ -13,14 +13,12 @@ This is a very simple module that copies files into their destination before run
       owner = config.services.deluge.user;
       group = config.services.deluge.group;
     };
+```
 
-    secrets.grafana = {
-      owner = "grafana";
-      group = "grafana";
-      secrets.auth = "/etc/secrets/grafana-auth";
-    };
-
-    secrets.prometheus = {
+This copies `/etc/secrets/deluge-auth` to `/etc/deluge/auth`, accessible only as the user the deluge service runs as.
+    
+```
+   secrets.prometheus = {
       owner = "prometheus";
       group = "prometheus";
       secrets.ca = "/etc/pki/pki/ca.crt";
@@ -29,3 +27,9 @@ This is a very simple module that copies files into their destination before run
     };
   };
 ```
+
+Multiple secrets can be copied.
+
+# Implementation
+
+The module is implemented by generating a systemd service that copies the files, and marking it as a requirement of the service. When the service is started, the "<service>-copy-secret" unit is started first, copies the file, and the new service finds the secrets where it expects them to be.
