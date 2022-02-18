@@ -17,7 +17,7 @@ This is a very simple module that copies files into their destination before run
 
 This copies `/etc/secrets/deluge-auth` to `/etc/deluge/auth`, accessible only as the user the deluge service runs as.
     
-```
+```nix
    secrets.prometheus = {
       owner = "prometheus";
       group = "prometheus";
